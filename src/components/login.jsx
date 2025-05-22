@@ -37,6 +37,7 @@ function Login() {
                 password
             });
 
+            console.log(response);
             if (response.data.success) {
                 response.data.data.role === 'manager'
                     ? navigate('/manager')

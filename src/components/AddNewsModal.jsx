@@ -15,8 +15,9 @@ const AddNewsModal = ({ open, handleClose, handleSubmit }) => {
         title: '',
         subTitle: '',
         content: '',
-        image: '',
+        image: null
     });
+    const [imagePreview, setImagePreview] = useState('');
 
     const onChange = (e) => {
         setForm({
@@ -25,9 +26,30 @@ const AddNewsModal = ({ open, handleClose, handleSubmit }) => {
         });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setForm(prev => ({ ...prev, image: file }));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const onSubmit = () => {
-        handleSubmit(form);
-        setForm({ title: '', subTitle: '', content: '', image: '' });
+        const formData = new FormData();
+        formData.append('title', form.title);
+        formData.append('subTitle', form.subTitle);
+        formData.append('content', form.content);
+        if (form.image) {
+            formData.append('image', form.image);
+        }
+
+        handleSubmit(formData);
+        setForm({ title: '', subTitle: '', content: '', image: null });
+        setImagePreview('');
         handleClose();
     };
 
@@ -130,28 +152,16 @@ const AddNewsModal = ({ open, handleClose, handleSubmit }) => {
                                 type="file"
                                 accept="image/*"
                                 hidden
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onloadend = () => {
-                                            setForm({
-                                                ...form,
-                                                image: reader.result // сохраняем base64
-                                            });
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }}
+                                onChange={handleImageChange}
                             />
                         </Button>
 
-                        {form.image && (
+                        {imagePreview && (
                             <Box mt={2}>
                                 <Typography sx={{ color: '#94a3b8', mb: 1 }}>Превью:</Typography>
                                 <Box
                                     component="img"
-                                    src={form.image}
+                                    src={imagePreview}
                                     alt="preview"
                                     sx={{ width: '100%', maxHeight: 200, borderRadius: 2, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
                                 />

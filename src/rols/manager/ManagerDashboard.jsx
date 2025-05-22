@@ -11,7 +11,6 @@ import {
     ListItemButton,
     Divider,
     IconButton,
-    useTheme
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -19,7 +18,6 @@ import AddNewsModal from "../../components/AddNewsModal.jsx";
 import { useNavigate } from "react-router-dom";
 
 function ManagerDashboard() {
-    const theme = useTheme();
     const [news, setNews] = useState({ 'data': [] });
     const api = 'http://127.0.0.1:8000/api/news';
     const [openModal, setOpenModal] = useState(false);
@@ -29,6 +27,7 @@ function ManagerDashboard() {
         try {
             const response = await axios.get(api);
             setNews(response.data);
+            console.log(response.data);
         } catch (e) {
             console.error("Error fetching news:", e);
         }

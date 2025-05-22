@@ -26,23 +26,27 @@ function NewsDetail() {
         title: '',
         subTitle: '',
         content: '',
-        image: ''
+        image: null
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState({url:null,type:false});
 
-    useEffect(() => {
-        const fetchNews = async () => {
-            setIsLoading(true);
-            try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/news/${id}`);
-                setNews(response.data.data);
-                setForm(response.data.data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setIsLoading(false);
+    const fetchNews = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/news/${id}`);
+            setNews(response.data.data);
+            setForm(response.data.data);
+            if (response.data.data.image) {
+                setImagePreview(response.data.data.image);
             }
-        };
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    useEffect(() => {
         fetchNews();
     }, [id]);
 
@@ -50,18 +54,45 @@ function NewsDetail() {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setForm(prev => ({ ...prev, image: file }));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview({url: reader.result,type: true});
+        };
+        reader.readAsDataURL(file);
+
+    };
+
     const handleUpdate = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.put(`http://127.0.0.1:8000/api/news/${id}`, form);
+            const formData = new FormData();
+            formData.append('title', form.title);
+            formData.append('subTitle', form.subTitle);
+            formData.append('content', form.content);
+            if (form.image) {
+                formData.append('image', form.image);
+            }
+
+            const response = await axios.post(`http://127.0.0.1:8000/api/news/${id}`, formData, {
+                params: { _method: 'PUT' } // Laravel поймёт, что это PUT
+                // Не указываем Content-Type вручную!
+            });
+
+            console.log(response);
             setNews(response.data.data);
             setEditMode(false);
+
         } catch (error) {
             console.error(error);
         } finally {
+            fetchNews();
             setIsLoading(false);
         }
     };
+
 
     const handleDelete = async () => {
         if (!window.confirm('Вы уверены, что хотите удалить эту новость?')) return;
@@ -178,7 +209,7 @@ function NewsDetail() {
                                 boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
                             }}>
                                 <img
-                                    src={news.image}
+                                    src={`http://127.0.0.1:8000/storage/${news.image}`}
                                     alt={news.title}
                                     style={{
                                         maxWidth: '100%',
@@ -231,15 +262,47 @@ function NewsDetail() {
                                 variant="outlined"
                             />
 
-                            <TextField
-                                label="Ссылка на изображение"
-                                name="image"
-                                value={form.image}
-                                onChange={handleChange}
-                                fullWidth
-                                sx={inputStyles}
-                                variant="outlined"
-                            />
+                            <Box>
+                                <Typography sx={{ color: '#94a3b8', mb: 1 }}>Изображение</Typography>
+                                <Button
+                                    variant="outlined"
+                                    component="label"
+                                    sx={{
+                                        color: '#f8fafc',
+                                        borderColor: 'rgba(255,255,255,0.2)',
+                                        '&:hover': {
+                                            borderColor: 'rgba(255,255,255,0.4)',
+                                        }
+                                    }}
+                                >
+                                    Загрузить изображение
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        hidden
+                                        onChange={handleImageChange}
+                                    />
+                                </Button>
+
+                                {imagePreview && (
+                                    <Box sx={{
+                                        mb: 3,
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                                    }}>
+                                        <Typography sx={{ color: '#94a3b8', mb: 1 }}>Превью:</Typography>
+                                        <img
+                                            src={imagePreview.type?imagePreview.url:`http://127.0.0.1:8000/storage/${news.image}`}
+                                            alt={news.title}
+                                            style={{
+                                                maxWidth: '100%',
+                                                display: 'block'
+                                            }}
+                                        />
+                                    </Box>
+                                )}
+                            </Box>
                         </Stack>
 
                         <Stack direction="row" spacing={2}>
