@@ -32,12 +32,12 @@ function Login() {
         setError('');
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/login', {
+            const response = await axios.post('http://127.0.0.1:8000/api/login/', {
                 login,
                 password
             });
 
-            console.log(response);
+            console.log(response.data);
             if (response.data.success) {
                 response.data.data.role === 'manager'
                     ? navigate('/manager')

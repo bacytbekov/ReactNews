@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 
 function ManagerDashboard() {
     const [news, setNews] = useState({ 'data': [] });
-    const api = 'http://127.0.0.1:8000/api/news';
+    const api = 'http://127.0.0.1:8000/api/news/';
     const [openModal, setOpenModal] = useState(false);
     const navigate = useNavigate();
 
@@ -38,8 +38,9 @@ function ManagerDashboard() {
 
     const handleAddNews = async (newsData) => {
         try {
-            await axios.post('http://127.0.0.1:8000/api/news', newsData);
+            await axios.post('http://127.0.0.1:8000/api/news/', newsData);
             fetchNews();
+
         } catch (error) {
             console.error("Error adding news:", error);
         }

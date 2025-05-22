@@ -76,10 +76,7 @@ function NewsDetail() {
                 formData.append('image', form.image);
             }
 
-            const response = await axios.post(`http://127.0.0.1:8000/api/news/${id}`, formData, {
-                params: { _method: 'PUT' } // Laravel поймёт, что это PUT
-                // Не указываем Content-Type вручную!
-            });
+            const response = await axios.put(`http://127.0.0.1:8000/api/news/${id}/`, formData);
 
             console.log(response);
             setNews(response.data.data);
@@ -99,7 +96,7 @@ function NewsDetail() {
 
         setIsLoading(true);
         try {
-            await axios.delete(`http://127.0.0.1:8000/api/news/${id}`);
+            await axios.delete(`http://127.0.0.1:8000/api/news/${id}/`);
             navigate('/manager');
         } catch (error) {
             console.error(error);
@@ -209,7 +206,7 @@ function NewsDetail() {
                                 boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
                             }}>
                                 <img
-                                    src={`http://127.0.0.1:8000/storage/${news.image}`}
+                                    src={news.image}
                                     alt={news.title}
                                     style={{
                                         maxWidth: '100%',
@@ -293,7 +290,7 @@ function NewsDetail() {
                                     }}>
                                         <Typography sx={{ color: '#94a3b8', mb: 1 }}>Превью:</Typography>
                                         <img
-                                            src={imagePreview.type?imagePreview.url:`http://127.0.0.1:8000/storage/${news.image}`}
+                                            src={imagePreview.type?imagePreview.url:news.image}
                                             alt={news.title}
                                             style={{
                                                 maxWidth: '100%',
